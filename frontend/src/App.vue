@@ -1,5 +1,5 @@
 <template>
-  <div class="row" id="MainApp" >
+  <div>
     <p v-if="connected">WS Connected sucessfully</p>
     <p v-else>No WS Connection</p>
     <textarea>
@@ -18,13 +18,9 @@ export default {
     const session = SessionDataStore();
     return { session };
   },
-  components: {},
-  data() {
-    return {
-    };
-  },
   watch: {
     connected() {
+      this.reconnect()
     },
   },
   mounted() {

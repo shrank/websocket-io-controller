@@ -8,10 +8,8 @@ export const SessionDataStore = defineStore("session", {
 
     // data
     data: {},
-    
   }),
   actions: {
-
     // Websocket and live updates
     connect() {
       console.log("try WebSocket connect");
@@ -36,7 +34,6 @@ export const SessionDataStore = defineStore("session", {
         this.connected = false
         console.log("WebSocket connection closed:", event.code);
       };
-      this.refreshAll();
     },
     handleUpdate(event) {
       console.log("handle Update", event);
@@ -59,10 +56,5 @@ export const SessionDataStore = defineStore("session", {
           return
       }
     },
-
-    refreshAll() {
-    },
-  },
-  getters: {
   },
 });
