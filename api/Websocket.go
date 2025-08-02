@@ -15,13 +15,14 @@ var upgrader = websocket.Upgrader{
 },
 }
 
+
+
 func (api ApiV1) WsHello(ws *websocket.Conn) {
   // send some initial data here
-	data := []string{"Initial Data"}
-	jsonResp, _ := json.Marshal(WebsocketUpdate{
-		MsgType: WS_LOGIN,
-		Data: unpackArray[string](data),
-	})
+	data := WebsocketHello{}
+	data.MsgType = WS_LOGIN
+	data.Inventory = append(data.Inventory, *api.Inventory...)
+	jsonResp, _ := json.Marshal(data)
 	ws.WriteMessage(websocket.TextMessage, []byte(jsonResp))
 }
 

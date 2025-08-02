@@ -1,10 +1,19 @@
 <template>
+  <p v-if="connected">WS Connected sucessfully</p>
+  <p v-else>No WS Connection</p>
+  <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 bg-light border">
+                <h4 class="text-center">I/O Status</h4>
+                <textarea>{{ wsdata }}</textarea>
+            </div>
+            <div class="col-md-6 bg-light border">
+                <h4 class="text-center">Card Inventory</h4>
+                <Inventory :data="inventory"></Inventory>
+            </div>
+        </div>
+    </div>
   <div>
-    <p v-if="connected">WS Connected sucessfully</p>
-    <p v-else>No WS Connection</p>
-    <textarea>
-    {{ wsdata }}
-    </textarea>
   </div>
 </template>
 
@@ -12,11 +21,17 @@
 import { mapState } from "pinia";
 import { SessionDataStore } from "./stores/session";
 
+import Inventory from "./Inventory.vue";
+
 export default {
   name: "App",
   setup() {
     const session = SessionDataStore();
     return { session };
+  },
+  components: {
+    Inventory
+
   },
   watch: {
     connected() {
@@ -27,7 +42,7 @@ export default {
     this.session.connect();
   },
   computed: {
-    ...mapState(SessionDataStore, ["connected", "data"]),
+    ...mapState(SessionDataStore, ["connected", "data", "inventory"]),
     wsdata() {
       return JSON.stringify(this.data)
     }

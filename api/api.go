@@ -25,11 +25,13 @@ type WebsocketUpdate struct {
 // Main Api class, accessable by all API methods
 type ApiV1 struct {
   MsgQueue *utils.Queue   // WebSocket message queue
+	Inventory *[]Card        // Card inventory
 }
 
-func NewAPI() (ApiV1) {
+func NewAPI(Inventory *[]Card) (ApiV1) {
   res := ApiV1{}
 	res.MsgQueue = utils.CreateQueue()
+	res.Inventory = Inventory
   return res
 }
 

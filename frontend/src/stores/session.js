@@ -8,6 +8,7 @@ export const SessionDataStore = defineStore("session", {
 
     // data
     data: {},
+    inventory: [],
   }),
   actions: {
     // Websocket and live updates
@@ -42,18 +43,20 @@ export const SessionDataStore = defineStore("session", {
       }
       switch(event.MsgType) {
         case "login":
-          this.data = event.Data
+          if ("Inventory" in event) {
+            this.inventory = event.Inventory
+          }
           return
         case "add":
           for (let a in event.Data) {
             this.data[a] = event.Data[a]
           }
           return
-        case "update":
-          for (let a in event.Data) {
-            this.data[a] = event.Data[a]
-          }
-          return
+        // case "update":
+        //   for (let a in event.Data) {
+        //     this.data[a] = event.Data[a]
+        //   }
+        //   return
       }
     },
   },

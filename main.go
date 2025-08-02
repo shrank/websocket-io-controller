@@ -16,7 +16,17 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func main() {
 
   router := httprouter.New()
-	api := api_class.NewAPI()
+	inventory := []api_class.Card {		
+		api_class.Card{
+			Type: "Test1",
+			StartAddr: 0,
+			AddrCount: 16,
+			WordSize: 1,
+			Mode: "Digital Input",
+			BusAddr: 1,
+		},
+	}
+	api := api_class.NewAPI(&inventory)
 
 	// Index Page
   router.GET("/",Index)
