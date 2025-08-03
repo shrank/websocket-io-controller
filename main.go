@@ -1,13 +1,71 @@
 package main
 
 import (
+	"encoding/csv"
+	"io"
+	"os"
+	"strconv"
   "fmt"
   "net/http"
 	"log"
 	"time"
   "github.com/julienschmidt/httprouter"
 	api_class "msa/io-controller/api"
+	io_class "msa/io-controller/io"
 )
+
+// ReadCardsFromCSV reads a CSV file and returns a slice of Card structs
+func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("could not open file: %w", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	// Read header
+	headers, err := reader.Read()
+	if err != nil {
+		return nil, fmt.Errorf("could not read header: %w", err)
+	}
+
+	// Index map for column headers
+	indices := map[string]int{}
+	for i, h := range headers {
+		indices[h] = i
+	}
+
+	var cards []io_class.Card
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("could not read record: %w", err)
+		}
+
+		busAddr, _ := strconv.Atoi(record[indices["BusAddr"]])
+		startAddr, _ := strconv.Atoi(record[indices["StartAddr"]])
+		card := io_class.Card{
+			BusAddr:   busAddr,
+			Type:      record[indices["Type"]],
+			StartAddr: startAddr,
+			Mode:      record[indices["Mode"]],
+			// Set default values
+			AddrCount: 0,
+			WordSize:  0,
+			Status: "Configured",
+		}
+		cards = append(cards, card)
+	}
+
+	return cards, nil
+}
+
+
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   fmt.Fprint(w, "Welcome!\n")
@@ -16,17 +74,10 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func main() {
 
   router := httprouter.New()
-	inventory := []api_class.Card {		
-		api_class.Card{
-			Type: "Test1",
-			StartAddr: 0,
-			AddrCount: 16,
-			WordSize: 1,
-			Mode: "Digital Input",
-			BusAddr: 1,
-		},
-	}
-	api := api_class.NewAPI(&inventory)
+	io_ctr := io_class.IoV1{}
+	io_ctr.Inventory, _ = ReadCardsFromCSV("config.txt")
+	io_ctr.Init()
+	api := api_class.NewAPI(&io_ctr)
 
 	// Index Page
   router.GET("/",Index)

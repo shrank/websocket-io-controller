@@ -7,7 +7,7 @@ import (
   "net/http"
   "github.com/julienschmidt/httprouter"
   utils "msa/io-controller/utils"
-
+  io "msa/io-controller/io"
 )
 
 const (
@@ -25,13 +25,13 @@ type WebsocketUpdate struct {
 // Main Api class, accessable by all API methods
 type ApiV1 struct {
   MsgQueue *utils.Queue   // WebSocket message queue
-	Inventory *[]Card        // Card inventory
+	Hardware *io.IoV1        // Card inventory
 }
 
-func NewAPI(Inventory *[]Card) (ApiV1) {
+func NewAPI(hwobj *io.IoV1) (ApiV1) {
   res := ApiV1{}
 	res.MsgQueue = utils.CreateQueue()
-	res.Inventory = Inventory
+	res.Hardware = hwobj
   return res
 }
 

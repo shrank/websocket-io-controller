@@ -9,6 +9,7 @@
           <th>Word Size</th>
           <th>Bus Addr</th>
           <th>Mode</th>
+          <th>Status</th>
         </tr>
       </thead>
      <tbody>
@@ -19,6 +20,7 @@
           <td>{{ item.WordSize }}</td>
           <td>{{ item.BusAddr }}</td>
           <td>{{ item.Mode }}</td>
+          <td>{{ item.Status }}</td>
         </tr>
       </tbody>
     </table>

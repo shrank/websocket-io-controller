@@ -21,7 +21,8 @@ func (api ApiV1) WsHello(ws *websocket.Conn) {
   // send some initial data here
 	data := WebsocketHello{}
 	data.MsgType = WS_LOGIN
-	data.Inventory = append(data.Inventory, *api.Inventory...)
+	data.Inventory = append(data.Inventory, api.Hardware.Inventory...)
+	data.Data = api.Hardware.DataBuffer
 	jsonResp, _ := json.Marshal(data)
 	ws.WriteMessage(websocket.TextMessage, []byte(jsonResp))
 }

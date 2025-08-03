@@ -42,9 +42,9 @@ export default {
     this.session.connect();
   },
   computed: {
-    ...mapState(SessionDataStore, ["connected", "data", "inventory"]),
+    ...mapState(SessionDataStore, ["connected", "bytedata", "inventory"]),
     wsdata() {
-      return JSON.stringify(this.data)
+      return JSON.stringify(this.bytedata)
     }
   },
   methods: {

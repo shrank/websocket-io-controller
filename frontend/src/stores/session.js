@@ -1,5 +1,19 @@
 import { defineStore } from "pinia";
 
+
+
+
+function base64ToArrayBuffer(base64) {
+    var binaryString = atob(base64);
+    var bytes = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+
+
 export const SessionDataStore = defineStore("session", {
   state: () => ({
     // internal
@@ -8,6 +22,7 @@ export const SessionDataStore = defineStore("session", {
 
     // data
     data: {},
+    bytedata: [],
     inventory: [],
   }),
   actions: {
@@ -45,6 +60,9 @@ export const SessionDataStore = defineStore("session", {
         case "login":
           if ("Inventory" in event) {
             this.inventory = event.Inventory
+          }
+          if("Data" in event) {
+            this.bytedata = base64ToArrayBuffer(event.Data)
           }
           return
         case "add":
