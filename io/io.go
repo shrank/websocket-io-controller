@@ -12,7 +12,7 @@ type Card struct {
 	AddrCount int
 	WordSize int
 	Mode string
-	BusAddr int
+	BusAddr byte
 	Status string
 }
 

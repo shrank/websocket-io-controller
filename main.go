@@ -50,7 +50,7 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 		busAddr, _ := strconv.Atoi(record[indices["BusAddr"]])
 		startAddr, _ := strconv.Atoi(record[indices["StartAddr"]])
 		card := io_class.Card{
-			BusAddr:   busAddr,
+			BusAddr:   byte(busAddr),
 			Type:      record[indices["Type"]],
 			StartAddr: startAddr,
 			Mode:      record[indices["Mode"]],
