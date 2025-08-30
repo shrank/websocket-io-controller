@@ -8,7 +8,6 @@ import (
   "fmt"
   "net/http"
 	"log"
-	"time"
   "github.com/julienschmidt/httprouter"
 	api_class "msa/io-controller/api"
 	io_class "msa/io-controller/io"
@@ -88,16 +87,6 @@ func main() {
   // Websockets
   router.GET("/api/v1/live", api.WsConnect)
   
-
-	// Do your work here
-  go func() {
-		for  true {
-			time.Sleep(time.Second)
-			t := time.Now()
-			api.SendUpdate(api_class.WS_UPDATE,t)
-		}
-	}()
-
   fmt.Printf("Starting server at port 8000\n")
   if err := http.ListenAndServe(":8000", router); err != nil {
     log.Fatal(err)
