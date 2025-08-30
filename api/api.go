@@ -22,6 +22,12 @@ type WebsocketUpdate struct {
   Data map[int]uint8 
 }
 
+type WebsocketHello struct {
+	MsgType string
+	Inventory []io.Card
+	Data []uint8
+}
+
 // Main Api class, accessable by all API methods
 type ApiV1 struct {
   MsgQueue *utils.Queue   // WebSocket message queue
