@@ -19,7 +19,7 @@ const (
 
 type WebsocketUpdate struct {
 	MsgType string
-  Data []any
+  Data map[int]uint8 
 }
 
 // Main Api class, accessable by all API methods
@@ -77,12 +77,7 @@ func unpackArray[T any](arr any) (r []any) {
 }
 
 // send update to WebSocket Clients
-func (api ApiV1) SendUpdate(t string, v any) error {
-  return api.SendUpdates(t, []any{v})
-}
-
-// send update to WebSocket Clients
-func (api ApiV1) SendUpdates(t string, v []any) error {
+func (api ApiV1) SendUpdates(t string, v map[int]uint8) error {
 	api.MsgQueue.Insert(WebsocketUpdate {
 		MsgType: t,
 		Data: v,

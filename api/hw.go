@@ -8,5 +8,5 @@ import(
 type WebsocketHello struct {
 	MsgType string
 	Inventory []io.Card
-	Data []byte
+	Data []uint8
 }

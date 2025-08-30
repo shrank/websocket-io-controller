@@ -18,7 +18,7 @@ type Card struct {
 
 
 type IoV1 struct {
-	DataBuffer []byte
+	DataBuffer []uint8
 	Inventory []Card
 	BufferSize int
 }
@@ -36,13 +36,41 @@ func (self *IoV1) Init() error {
 		if(end_addr > max_addr) {
 			max_addr = end_addr
 		}
-		self.BufferSize += (self.Inventory[c].AddrCount * self.Inventory[c].WordSize) / 8
-		if( (self.Inventory[c].AddrCount * self.Inventory[c].WordSize) % 8 > 0) {
-			self.BufferSize += 1
-		}
 	}
+	self.BufferSize = max_addr
 	fmt.Printf("initializing buffer of %d bytes\n", self.BufferSize)
-	self.DataBuffer = make([]byte, self.BufferSize, self.BufferSize)
+	self.DataBuffer = make([]uint8, self.BufferSize, self.BufferSize)
   return nil
 }
 
+func (self *IoV1) Update(data map[int]uint8 ) map[int]uint8 {
+	res := make(map[int]uint8)
+	for key, value := range data {
+		if(key < len(self.DataBuffer)) {
+			if(self.DataBuffer[key] != value) {
+				self.DataBuffer[key] = value
+				res[key] = value
+			}
+		}	else	{
+			fmt.Printf("address out of range: %d", key)
+		}
+	}
+	for _, card := range self.Inventory {
+		if(strings.ToLower(card.Mode) != "out") {
+			continue
+		}
+		for key, _ := range res {
+			if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
+				self.doUpdate(card)
+				break
+			}
+		}
+	}
+	return res
+}
+
+func (self *IoV1) doUpdate(card Card){
+		if(strings.ToLower(card.Type) == "mcp23017") {
+			MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
+		}
+}

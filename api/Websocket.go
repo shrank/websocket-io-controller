@@ -22,7 +22,8 @@ func (api ApiV1) WsHello(ws *websocket.Conn) {
 	data := WebsocketHello{}
 	data.MsgType = WS_LOGIN
 	data.Inventory = append(data.Inventory, api.Hardware.Inventory...)
-	data.Data = api.Hardware.DataBuffer
+	data.Data = append(data.Data, api.Hardware.DataBuffer...)
+  
 	jsonResp, _ := json.Marshal(data)
 	ws.WriteMessage(websocket.TextMessage, []byte(jsonResp))
 }
@@ -42,6 +43,25 @@ func (api ApiV1) WsConnect (w http.ResponseWriter, r *http.Request, _ httprouter
   current_message, _, _ :=api.MsgQueue.Last()
 
 	api.WsHello(ws)
+
+	go func() {
+		for {
+			_, message, err := ws.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				return
+			}
+			res := WebsocketUpdate{}
+			json.Unmarshal(message, &res)
+			if(res.MsgType == "update") {
+					r := api.Hardware.Update(res.Data)
+					if(len(r) > 0) {
+						api.SendUpdates(WS_UPDATE, r)
+					}
+			}
+			log.Printf("recv: %s", message)
+		}
+	}()
 
   for {
     cnt, res, err := api.MsgQueue.Wait(current_message)		 

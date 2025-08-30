@@ -29,6 +29,28 @@ func MCP23017_init(data *Card)(*Card) {
 	if(strings.ToLower(data.Mode) == "out") {
 		mcp.Set(mcp23017.AllPins()).OUTPUT()
 	}
+
+	// set IOCON to 0x0 to enable banmk	
+	mcp.writeReg(mcp23017.IOCON, 0x00)
+
 	data.Status="READY"
 	return data
+}
+
+func MCP23017_update(c *Card, d []uint8)(error) {
+	i2c, err := i2c.New(mcp23017.DefI2CAdr + c.BusAddr, 1)
+	if err != nil {
+		return err
+	}
+
+	value := uint16(0)
+	for _, v := range d {
+		value *= 2
+		if(v > 0 ) {
+			value += 1
+		}
+	}
+	
+	i2c.WriteRegU16BE(byte(0x12), value)
+	return nil
 }

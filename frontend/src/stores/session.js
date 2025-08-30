@@ -5,11 +5,11 @@ import { defineStore } from "pinia";
 
 function base64ToArrayBuffer(base64) {
     var binaryString = atob(base64);
-    var bytes = new Uint8Array(binaryString.length);
+    var bytes = []
     for (var i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
-    return bytes.buffer;
+    return bytes;
 }
 
 
@@ -63,6 +63,7 @@ export const SessionDataStore = defineStore("session", {
           }
           if("Data" in event) {
             this.bytedata = base64ToArrayBuffer(event.Data)
+            console.log(this.bytedata)
           }
           return
         case "add":
@@ -70,12 +71,17 @@ export const SessionDataStore = defineStore("session", {
             this.data[a] = event.Data[a]
           }
           return
-        // case "update":
-        //   for (let a in event.Data) {
-        //     this.data[a] = event.Data[a]
-        //   }
-        //   return
+        case "update":
+          for (let a in event.Data) {
+            this.bytedata[a] = event.Data[a]
+          }
+          return
       }
     },
+    IoUpdate(data) {
+      if(this.ws != null) {
+        this.ws.send(JSON.stringify({"MsgType": "update", "data": data }))
+      }
+    }
   },
 });
