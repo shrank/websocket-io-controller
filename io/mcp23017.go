@@ -31,7 +31,7 @@ func MCP23017_init(data *Card)(*Card) {
 	}
 
 	// set IOCON to 0x0 to enable banmk	
-	mcp.writeReg(mcp23017.IOCON, 0x00)
+	i2c.WriteRegU8(byte(mcp23017.IOCON), 0x0)
 
 	data.Status="READY"
 	return data
