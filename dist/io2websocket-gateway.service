@@ -1,0 +1,8 @@
+[Unit]
+Description=io2websocket-gateway
+Requires=network.target
+[Service]
+WorkingDirectory=/usr/share/io2websocket-gateway
+ExecStart=io2websocket-gateway /etc/io2websocket-gateway.conf
+[Install]
+WantedBy=multi-user.target

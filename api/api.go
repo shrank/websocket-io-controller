@@ -6,8 +6,8 @@ import (
   "encoding/json"
   "net/http"
   "github.com/julienschmidt/httprouter"
-  utils "msa/io-controller/utils"
-  io "msa/io-controller/io"
+  utils "msa/io2websocket-gateway/utils"
+  io "msa/io2websocket-gateway/io"
 )
 
 const (

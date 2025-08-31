@@ -1,4 +1,4 @@
-module msa/io-controller
+module msa/io2websocket-gateway
 
 go 1.21.4
 

@@ -9,8 +9,8 @@ import (
   "net/http"
 	"log"
   "github.com/julienschmidt/httprouter"
-	api_class "msa/io-controller/api"
-	io_class "msa/io-controller/io"
+	api_class "msa/io2websocket-gateway/api"
+	io_class "msa/io2websocket-gateway/io"
 )
 
 // ReadCardsFromCSV reads a CSV file and returns a slice of Card structs

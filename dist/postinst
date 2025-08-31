@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+# Reload systemd unit
+systemctl daemon-reload
+
+test -e /etc/io2websocket-gateway.conf || cp /usr/share/io2websocket-gateway/io2websocket-gateway.conf /etc/io2websocket-gateway.conf

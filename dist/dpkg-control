@@ -1,0 +1,7 @@
+Package: io2websocket-gateway
+Section: base
+Priority: optional
+Maintainer: shrank <info@murxs.ch>
+Description: small webserver that lets you control I/O ports using a websocket based API
+Multi-Arch: allowed
+Depends: 
