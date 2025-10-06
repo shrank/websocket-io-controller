@@ -6,6 +6,17 @@ import (
 	"math/rand"
 )
 
+func Interrupt_init(pin string)(error) {
+	return nil
+}
+
+func Interrupt_Fired(pin string)( bool, error) {
+	if(rand.Intn(2) > 0){
+		return true, nil
+	}
+	return false, nil
+}
+
 func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1

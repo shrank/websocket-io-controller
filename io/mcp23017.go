@@ -38,6 +38,7 @@ func MCP23017_init(data *Card)(*Card) {
 }
 
 func MCP23017_update(c *Card, d []uint8)(error) {
+	//might need some locking
 	i2c, err := i2c.New(mcp23017.DefI2CAdr + c.BusAddr, 1)
 	if err != nil {
 		return err
@@ -53,4 +54,10 @@ func MCP23017_update(c *Card, d []uint8)(error) {
 	
 	i2c.WriteRegU16BE(byte(0x12), value)
 	return nil
+}
+
+func MCP23017_read(data *Card)(res []uint8, err error) {
+	//might need some locking
+	res = make([]uint8, 16)
+	return res, nil
 }

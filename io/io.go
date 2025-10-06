@@ -40,7 +40,9 @@ func (self *IoV1) Init() error {
 		if(strings.ToLower(card.Type) == "mcp3208") {
 			MCP3208_init(&self.Inventory[c])
 		}
-
+		if(card.InterruptPin != "") {
+			Interrupt_init(card.InterruptPin)
+		}
 		end_addr := self.Inventory[c].StartAddr + self.Inventory[c].AddrCount
 		if(end_addr > max_addr) {
 			max_addr = end_addr
@@ -84,6 +86,12 @@ func (self *IoV1) Run() error {
 		for _, card := range self.Inventory {
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
+			}
+			if(card.InterruptPin != "") {
+				i, _ := Interrupt_Fired(card.InterruptPin)
+				if(i == false){
+					continue
+				}
 			}
 			var res []uint8
 			var err error
