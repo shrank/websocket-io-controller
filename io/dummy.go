@@ -23,3 +23,11 @@ func MCP23017_update(c *Card, d []uint8)(error) {
 	fmt.Printf("update card %d: %x\n", c.BusAddr, value)
 	return nil
 }
+
+func MCP3208_init(data *Card)(*Card) {
+	fmt.Printf("DD\n")
+	data.AddrCount=8
+	data.WordSize=1
+	data.Status="READY"
+	return data
+}

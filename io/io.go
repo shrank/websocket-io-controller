@@ -33,6 +33,10 @@ func (self *IoV1) Init() error {
 			MCP23017_init(&self.Inventory[c])
 		}
 
+		if(strings.ToLower(card.Type) == "mcp3208") {
+			MCP3208_init(&self.Inventory[c])
+		}
+
 		end_addr := self.Inventory[c].StartAddr + self.Inventory[c].AddrCount
 		if(end_addr > max_addr) {
 			max_addr = end_addr
