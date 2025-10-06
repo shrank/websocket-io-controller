@@ -38,6 +38,7 @@ func NewAPI(hwobj *io.IoV1) (ApiV1) {
   res := ApiV1{}
 	res.MsgQueue = utils.CreateQueue()
 	res.Hardware = hwobj
+	hwobj.UpdateHandler = res.SendUpdates
   return res
 }
 

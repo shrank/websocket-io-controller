@@ -1,8 +1,10 @@
 package io
 
 import (
+	"log"
 	"fmt"
 	"strings"
+	"time"
 )
 
 
@@ -17,8 +19,10 @@ type Card struct {
 	InterruptPin string
 }
 
+type UpdateHandler func(t string, v map[int]uint8) error
 
 type IoV1 struct {
+	UpdateHandler UpdateHandler
 	DataBuffer []uint8
 	Inventory []Card
 	BufferSize int
@@ -72,6 +76,46 @@ func (self *IoV1) Update(data map[int]uint8 ) map[int]uint8 {
 		}
 	}
 	return res
+}
+
+
+func (self *IoV1) Run() error {
+	for true {
+		for _, card := range self.Inventory {
+			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
+				continue
+			}
+			var res []uint8
+			var err error
+			update := make(map[int]uint8)
+			if(strings.ToLower(card.Type) == "mcp23017") {
+				res, err = MCP23017_read(&card)
+			}
+
+			if(strings.ToLower(card.Type) == "mcp3208") {
+				res, err = MCP3208_read(&card)
+			}
+			if(err != nil) {
+				log.Fatal(err)
+			}
+			i := 0
+			for i < card.AddrCount {
+				if(i>= len(res)) {
+					break
+				}
+				if(self.DataBuffer[i+card.StartAddr] != res[i]) {
+					self.DataBuffer[i+card.StartAddr] = res[i]
+					update[i+card.StartAddr] = res[i]			
+				}
+				i += 1
+			}
+			if(len(update) > 0 ) {
+				self.UpdateHandler("update", update)
+			}
+		}
+		time.Sleep(1 * time.Second)		
+	}	
+	return nil
 }
 
 func (self *IoV1) doUpdate(card Card){

@@ -3,6 +3,7 @@ package io
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 func MCP23017_init(data *Card)(*Card) {
@@ -24,10 +25,26 @@ func MCP23017_update(c *Card, d []uint8)(error) {
 	return nil
 }
 
+func MCP23017_read(data *Card)(res []uint8, err error) {
+	res = make([]uint8, 16)
+	for k, _ := range res {
+		res[k] = uint8(rand.Intn(2))
+	}
+	return res, nil
+}
+
+
 func MCP3208_init(data *Card)(*Card) {
-	fmt.Printf("DD\n")
 	data.AddrCount=8
 	data.WordSize=1
 	data.Status="READY"
 	return data
+}
+
+func MCP3208_read(data *Card)(res []uint8, err error) {
+	res = make([]uint8, 8)
+	for k, _ := range res {
+		res[k] = uint8(rand.Intn(255))
+	}
+	return res, nil
 }

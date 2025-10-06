@@ -91,6 +91,7 @@ func main() {
 	}
 	io_ctr.Init()
 	api := api_class.NewAPI(&io_ctr)
+	
 
 	// Index Page
   router.GET("/",Index)
@@ -103,6 +104,9 @@ func main() {
   // Websockets
   router.GET("/api/v1/live", api.WsConnect)
   
+  fmt.Printf("Starting IO loop\n")
+	go io_ctr.Run()
+
   fmt.Printf("Starting server at port 8000\n")
   if err := http.ListenAndServe(":8000", router); err != nil {
     log.Fatal(err)
