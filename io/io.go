@@ -14,6 +14,7 @@ type Card struct {
 	Mode string
 	BusAddr byte
 	Status string
+	InterruptPin string
 }
 
 

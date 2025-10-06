@@ -8,6 +8,7 @@ import (
   "fmt"
   "net/http"
 	"log"
+	"flag"
   "github.com/julienschmidt/httprouter"
 	api_class "msa/io2websocket-gateway/api"
 	io_class "msa/io2websocket-gateway/io"
@@ -22,7 +23,7 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-
+	reader.FieldsPerRecord = -1
 	// Read header
 	headers, err := reader.Read()
 	if err != nil {
@@ -57,7 +58,11 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 			AddrCount: 0,
 			WordSize:  0,
 			Status: "Configured",
+			InterruptPin: "",
 		}
+//		if(indices["Interrupt"] < len(record)) {
+//			card.InterruptPin = record[indices["Interrupt"]]
+//		}
 		cards = append(cards, card)
 	}
 
@@ -72,18 +77,29 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func main() {
 
+	dbgDir := flag.String("debug-dir", "", "directory for debug files")
+	config := flag.String("config", "/etc/io2websocket-gateway.conf", "config file")
+	flag.Parse()
   router := httprouter.New()
 	io_ctr := io_class.IoV1{}
-	io_ctr.Inventory, _ = ReadCardsFromCSV("config.txt")
+	fmt.Printf("read config %s\n", *config)
+  var csv_error error
+	io_ctr.Inventory, csv_error = ReadCardsFromCSV(*config)
+	if(csv_error != nil) {
+		fmt.Printf("error reading config file %s: %s\n", *config, csv_error)
+		return
+	}
 	io_ctr.Init()
 	api := api_class.NewAPI(&io_ctr)
 
 	// Index Page
   router.GET("/",Index)
 
-	// static files
-  router.ServeFiles("/debug/*filepath", http.Dir("./public"))
-	
+	if(*dbgDir != "") {
+		// static files
+		router.ServeFiles("/debug/*filepath", http.Dir(*dbgDir))
+		fmt.Printf("serving /debug UI from %s\n", *dbgDir)
+	}
   // Websockets
   router.GET("/api/v1/live", api.WsConnect)
   
