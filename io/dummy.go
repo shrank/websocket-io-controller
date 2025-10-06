@@ -18,6 +18,16 @@ func Interrupt_Fired(pin string)( bool, error) {
 	return false, nil
 }
 
+func Ouput_init(pin string)(error) {
+	fmt.Printf("Setup Output Pin %s\n", pin)
+	return nil
+}
+
+func Output_set(pin string, value byte)(error) {
+	return nil
+}
+
+
 func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1
