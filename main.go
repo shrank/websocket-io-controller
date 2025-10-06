@@ -60,9 +60,9 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 			Status: "Configured",
 			InterruptPin: "",
 		}
-//		if(indices["Interrupt"] < len(record)) {
-//			card.InterruptPin = record[indices["Interrupt"]]
-//		}
+		if(indices["Interrupt"] < len(record)) {
+			card.InterruptPin = record[indices["Interrupt"]]
+		}
 		cards = append(cards, card)
 	}
 

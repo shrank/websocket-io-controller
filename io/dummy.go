@@ -7,6 +7,7 @@ import (
 )
 
 func Interrupt_init(pin string)(error) {
+	fmt.Printf("Setup Interrupt Pin %s\n", pin)
 	return nil
 }
 
