@@ -33,8 +33,16 @@ func MCP23017_init(data *Card)(*Card) {
 		}
 	}
 
-	mcp12017_drivers[data.BusAddr] = i2c.NewGenericDriver(board, "mcp12017", int(0x20 + data.BusAddr))
-	data.Status="READY"
+	mcp12017_drivers[data.BusAddr] = i2c.NewGenericDriver(board, "mcp12017", int(0x20 + data.BusAddr), i2c.WithBus(1))
+	err := mcp12017_drivers[data.BusAddr].Start()
+
+	if(err != nil) {
+		data.Status=err.Error()
+		data.Ready = false
+	} else {
+		data.Ready = true
+		data.Status="READY"
+	}
 	return data
 }
 

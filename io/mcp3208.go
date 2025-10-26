@@ -21,9 +21,18 @@ func MCP3208_enable(data *Card) {
 func MCP3208_init(data *Card)(*Card) {
 	data.AddrCount=8
 	data.WordSize=1
-	data.Status="READY"
 	Ouput_init(SPI_BUS_SELECTOR[int(data.BusAddr)])
+	MCP3208_enable(data)
 	mcp3208_drivers[data.BusAddr] = spi.NewMCP3208Driver(board)
+	// err := mcp3208_drivers[data.BusAddr].Start()
+	// if(err != nil) {
+	// 	data.Status=err.Error()
+	// 	data.Ready = false
+	// } else {
+ 	data.Ready = true
+ 	data.Status="READY"
+	// }
+
 	return data
 }
 

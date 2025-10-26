@@ -21,6 +21,7 @@ type Card struct {
 	BusAddr byte
 	Status string
 	InterruptPin string
+	Ready bool
 }
 
 type UpdateHandler func(t string, v map[int]uint8) error
@@ -88,6 +89,9 @@ func (self *IoV1) Update(data map[int]uint8 ) map[int]uint8 {
 func (self *IoV1) Run() error {
 	for true {
 		for _, card := range self.Inventory {
+			if(card.Ready == false) {
+				continue
+			}
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
 			}
@@ -131,6 +135,10 @@ func (self *IoV1) Run() error {
 }
 
 func (self *IoV1) doUpdate(card Card){
+		if(card.Ready == false) {
+			return
+		}
+
 		if(strings.ToLower(card.Type) == "mcp23017") {
 			MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
 		}
