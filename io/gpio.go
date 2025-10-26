@@ -3,21 +3,19 @@ package io
 
 import (
 	"fmt"
-	"log"
-	"gobot.io/x/gobot/v2"
+	"gobot.io/x/gobot/v2/drivers/gpio"
 	"gobot.io/x/gobot/v2/platforms/raspi"
 	"gobot.io/x/gobot/v2/system"
-	"time"
 	"sync"
 )
 
-board := raspi.NewAdaptor()
-gpio_pins := make(map[string](*DirectPinDriver))
-i2c_lock := sync.Mutex()
+var board = raspi.NewAdaptor()
+var gpio_pins = make(map[string](*gpio.DirectPinDriver))
+var i2c_lock sync.Mutex
 
 func Interrupt_init(pin string)(error) {
 	fmt.Printf("Setup Interrupt Pin %s\n", pin)
-	p, err := board.DigitalPin(pin)
+	inPin, err := board.DigitalPin(pin)
 	if err != nil {
 		return err
 	}
@@ -37,11 +35,11 @@ func Interrupt_Fired(pin string)( bool, error) {
 
 func Ouput_init(pin string)(error) {
 	fmt.Printf("Setup Output Pin %s\n", pin)
-	p, err := board.DigitalPin(pin)
+	inPin, err := board.DigitalPin(pin)
 	if err != nil {
 		return err
 	}
-	err = inPin.ApplyOptions(system.WithPinDirectionOutput())
+	err = inPin.ApplyOptions(system.WithPinDirectionOutput(0))
 	if err != nil {
 		return err
 	}
