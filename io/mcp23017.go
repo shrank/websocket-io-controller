@@ -4,6 +4,7 @@ package io
 
 import (
 	"strings"
+	"fmt"
 	"gobot.io/x/gobot/v2/drivers/i2c"
 )
 
@@ -12,37 +13,36 @@ var mcp12017_drivers = make(map[byte](*i2c.GenericDriver))
 func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1
-
+	data.Ready = false
 	i2c_lock.Lock()
 	defer i2c_lock.Unlock()
 	
-	d := i2c.NewMCP23017Driver(
-		board,  
-		i2c.WithBus(0), 
-		i2c.WithAddress(int(0x20 + data.BusAddr)),
-		i2c.WithMCP23017Bank(0),		// use bank 0
-		i2c.WithMCP23017Intpol(1),	// interrupt polarity high
-		i2c.WithMCP23017Seqop(0),		// enable sequencial operation
-		i2c.WithMCP23017Mirror(1),		// mirror interrupt pins
-	)
+	d := i2c.NewGenericDriver(board, "mcp12017", int(0x20 + data.BusAddr), i2c.WithBus(1))
+	err := d.Start()
+	if(err != nil) {
+		data.Status=err.Error()
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return data
+	} 
 
-	if(strings.ToLower(data.Mode) == "out") {
-		for i := 0; i < 8; i++ {
-			d.SetPinMode(uint8(i), "A", 0)
-			d.SetPinMode(uint8(i), "B", 0)
-		}
-	}
-
-	mcp12017_drivers[data.BusAddr] = i2c.NewGenericDriver(board, "mcp12017", int(0x20 + data.BusAddr), i2c.WithBus(1))
-	err := mcp12017_drivers[data.BusAddr].Start()
+	err = d.WriteByteData(0x0a, 32 + 16)	// IOCON: MIRROR + SEQOP 
 
 	if(err != nil) {
 		data.Status=err.Error()
-		data.Ready = false
-	} else {
-		data.Ready = true
-		data.Status="READY"
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return data
 	}
+	d.WriteWordData(0x2,0xffff)	// Invert Polarity
+
+	d.WriteWordData(0x4,0xffff)	// Enable Interrupts
+
+	if(strings.ToLower(data.Mode) == "out") {
+		d.WriteWordData(0x0,0x0)	//set direction output
+	}
+
+	mcp12017_drivers[data.BusAddr] = d
+	data.Ready = true
+	data.Status="READY"
 	return data
 }
 
