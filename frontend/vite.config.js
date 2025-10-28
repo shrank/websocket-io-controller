@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/debug/', // Change 'subdirectory' to match your subdirectory name
   server: {
     proxy: {
       '/api': {
