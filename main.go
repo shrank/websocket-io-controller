@@ -9,6 +9,7 @@ import (
   "net/http"
 	"log"
 	"flag"
+	"strings"
   "github.com/julienschmidt/httprouter"
 	api_class "msa/io2websocket-gateway/api"
 	io_class "msa/io2websocket-gateway/io"
@@ -29,7 +30,6 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not read header: %w", err)
 	}
-
 	// Index map for column headers
 	indices := map[string]int{}
 	for i, h := range headers {
@@ -45,6 +45,9 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 		}
 		if err != nil {
 			return nil, fmt.Errorf("could not read record: %w", err)
+		}
+		if(strings.HasPrefix(record[0],"#")) {
+			continue
 		}
 
 		busAddr, _ := strconv.Atoi(record[indices["BusAddr"]])
