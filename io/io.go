@@ -36,6 +36,7 @@ type IoV1 struct {
 func (self *IoV1) Init() error {
 	max_addr := 0
 	self.BufferSize = 0
+	Raspi_init()
 	for c, card := range self.Inventory {
 		fmt.Printf("Init Card #%d\n", c)
 		if(strings.ToLower(card.Type) == "mcp23017") {
