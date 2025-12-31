@@ -6,6 +6,11 @@ import (
 	"math/rand"
 )
 
+func Raspi_init()(error) {
+	return nil
+}
+
+
 func Interrupt_init(pin string)(error) {
 	fmt.Printf("Setup Interrupt Pin %s\n", pin)
 	return nil
