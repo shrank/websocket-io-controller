@@ -24,6 +24,7 @@ export const SessionDataStore = defineStore("session", {
     data: {},
     bytedata: [],
     inventory: [],
+    log: [],
   }),
   actions: {
     // Websocket and live updates
@@ -74,6 +75,7 @@ export const SessionDataStore = defineStore("session", {
         case "update":
           for (let a in event.Data) {
             this.bytedata[a] = event.Data[a]
+            this.addLog({ addr: a, value: event.Data[a] })
           }
           return
       }
@@ -82,6 +84,10 @@ export const SessionDataStore = defineStore("session", {
       if(this.ws != null) {
         this.ws.send(JSON.stringify({"MsgType": "update", "data": data }))
       }
+    },
+    addLog(data) {
+        this.log.unshift({ ts: new Date(), data: data})
+        this.log.splice(100)
     }
   },
 });

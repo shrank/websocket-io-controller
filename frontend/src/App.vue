@@ -10,6 +10,8 @@
             <div class="col-md-6 bg-light border">
                 <h4 class="text-center">Card Inventory</h4>
                 <Inventory :data="inventory"></Inventory>
+                <h4 class="text-center">Log</h4>
+                <Log></Log>
             </div>
         </div>
     </div>
@@ -23,6 +25,7 @@ import { SessionDataStore } from "./stores/session";
 
 import Inventory from "./Inventory.vue";
 import IoGrid from "./iogrid.vue";
+import Log from "./Log.vue";
 
 export default {
   name: "App",
@@ -33,6 +36,7 @@ export default {
   components: {
     Inventory,
     IoGrid,
+    Log,
   },
   watch: {
     connected() {
