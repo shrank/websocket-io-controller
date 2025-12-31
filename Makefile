@@ -9,7 +9,7 @@ DPKG=dpkg-deb
 
 all:
 
-frontend:
+ui:
 	cd frontend && npm install
 	cd frontend && npm run build
 	cp frontend/dist/* public/
@@ -18,7 +18,7 @@ server: ${NAME}
 
 dist: release/${PKG}.deb
 
-build/${PKG}: server
+build/${PKG}: server ui
 	mkdir -p $@/etc/
 	mkdir -p $@/usr/local/bin
 	mkdir -p $@/usr/share/${NAME}/public
@@ -45,4 +45,4 @@ clean:
 	rm -rf build
 
 ${NAME}:
-	go build
+	GOARCH=arm64 go build
