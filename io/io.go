@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-var SPI_BUS_SELECTOR = map[int]string{
-    20: "20",
-    21: "21",
-}
-
 type Card struct {
 	Type string
 	StartAddr int
