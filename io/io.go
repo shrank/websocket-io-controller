@@ -88,10 +88,10 @@ func (self *IoV1) Run() error {
 	fmt.Printf("Starting main IO loop\n")
 	for true {
 		count += 1
+		update := make(map[int]uint8)
 		for _, card := range self.Inventory {
 			var err error
 			var res []uint8
-			update := make(map[int]uint8)
 
 			if(card.Ready == false) {
 				continue
@@ -108,7 +108,7 @@ func (self *IoV1) Run() error {
 			} else {
 				if(card.ReadEvery > 1) {
 					// we try to read only one card every run
-					if(count % card.ReadEvery != 10 % int(card.BusAddr)) {
+					if(count % card.ReadEvery != int(card.BusAddr) % 10) {
 						continue
 					}
 				}
@@ -140,9 +140,9 @@ func (self *IoV1) Run() error {
 				}
 				i += 1
 			}
-			if(len(update) > 0 ) {
-				self.UpdateHandler("update", update)
-			}
+		}
+		if(len(update) > 0 ) {
+			self.UpdateHandler("update", update)
 		}
 		time.Sleep(10 * time.Millisecond)
 	}	

@@ -67,6 +67,7 @@ func MCP3208_init(data *Card)(*Card) {
 	data.WordSize=1
 	data.Status="READY"
 	data.Ready=true
+	data.ReadEvery=10
 	return data
 }
 

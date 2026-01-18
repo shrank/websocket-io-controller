@@ -12,7 +12,7 @@ var mcp3208_drivers = make(map[byte](*spi.MCP3208Driver))
 func MCP3208_init(data *Card)(*Card) {
 	data.AddrCount=8
 	data.WordSize=1
-	data.ReadEvery=4
+	data.ReadEvery=10
 	mcp3208_drivers[data.BusAddr] = spi.NewMCP3208Driver(board, spi.WithChipNumber(data.BusAddr-20))
 	err := mcp3208_drivers[data.BusAddr].Start()
 	if(err != nil) {
