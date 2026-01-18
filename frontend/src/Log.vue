@@ -1,5 +1,6 @@
 <template>
   <div>
+    <label>Max Log Address <input v-model="maxlogaddress" type="number" step="1"/></label>
     <table class="" style="width: 100%">
       <thead>
         <tr>
@@ -21,7 +22,7 @@
 
 <script>
 import { SessionDataStore } from './stores/session';
-import { mapState } from 'pinia';
+import { mapState, mapWritableState } from 'pinia';
 
 export default {
   name: "Log",
@@ -31,6 +32,7 @@ export default {
   },
   computed: {
     ...mapState(SessionDataStore, ["log"]),
+    ...mapWritableState(SessionDataStore, ["maxlogaddress"])
   },
 };
 </script>

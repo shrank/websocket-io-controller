@@ -15,7 +15,10 @@
           <td>{{ item.addr }}</td>
           <td>{{ item.mode }}</td>
           <td>{{ item.value }}</td>
-          <td><button v-if="['IN', 'OUT'].includes(item.mode)" @click="toggle(item)">Toggle</button></td>
+          <td>
+            <button v-if="['IN', 'OUT'].includes(item.mode)" @click="toggle(item)">Toggle</button>
+            <button @click="monitor(item)">Monitor</button>
+            </td>
           <td v-if="item.span > 0 " :class="item.status" :rowspan="item.span"><div class="text-topdown">Card #{{ item.slot }}</div></td>
         </tr>
       </tbody>
@@ -102,6 +105,9 @@ export default {
     },
     getValue(i) {
       return this.bytedata[i]
+    },
+    monitor(item) {
+      this.session.setMonitor(item.addr)
     }
   }
 };

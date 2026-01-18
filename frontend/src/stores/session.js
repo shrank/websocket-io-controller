@@ -25,6 +25,9 @@ export const SessionDataStore = defineStore("session", {
     bytedata: [],
     inventory: [],
     log: [],
+    maxlogaddress: 127,
+    monitor_addr: -1,
+    monitor_buffer: []
   }),
   actions: {
     // Websocket and live updates
@@ -86,8 +89,24 @@ export const SessionDataStore = defineStore("session", {
       }
     },
     addLog(data) {
+      if(this.maxlogaddress >= data.addr) {
         this.log.unshift({ ts: new Date(), data: data})
         this.log.splice(100)
+      }
+      if(this.monitor_addr == data.addr) {
+        this.monitor_buffer.unshift({ ts: new Date(), data: data})
+        this.monitor_buffer.splice(100)
+      }
+    },
+    setMonitor(addr) {
+      this.monitor_buffer = [{
+        ts: new Date(),
+        data: {
+          addr: addr,
+          value: this.data[addr]
+        }
+      }]
+      this.monitor_addr = addr
     }
   },
 });

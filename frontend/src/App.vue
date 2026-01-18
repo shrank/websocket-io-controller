@@ -10,6 +10,7 @@
             <div class="col-md-6 bg-light border">
                 <h4 class="text-center">Card Inventory</h4>
                 <Inventory :data="inventory"></Inventory>
+                <Monitor></Monitor>
                 <h4 class="text-center">Log</h4>
                 <Log></Log>
             </div>
@@ -20,12 +21,13 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
 import { SessionDataStore } from "./stores/session";
 
 import Inventory from "./Inventory.vue";
 import IoGrid from "./iogrid.vue";
 import Log from "./Log.vue";
+import Monitor from "./Monitor.vue"
 
 export default {
   name: "App",
@@ -37,6 +39,7 @@ export default {
     Inventory,
     IoGrid,
     Log,
+    Monitor,
   },
   watch: {
     connected() {
