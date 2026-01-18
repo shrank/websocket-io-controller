@@ -2,11 +2,12 @@
 
 This is a small webserver that lets you control I/O ports using a websocket based API. It currently supports MCP23017
 
-
+```
                             ______________      i2c
 Websocket Client --------->| io2websocket | --------------> MCP23017 Card #1
                            |______________|        |------> MCP23017 Card #2
                                                    +------> MCP23017 Card #3
+```
 
 ## config
 
