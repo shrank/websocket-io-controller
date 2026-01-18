@@ -17,7 +17,7 @@ func Interrupt_init(pin string)(error) {
 }
 
 func Interrupt_Fired(pin string)( bool, error) {
-	if(rand.Intn(2) > 0){
+	if(rand.Intn(255) == 0){
 		return true, nil
 	}
 	return false, nil
@@ -37,6 +37,7 @@ func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1
 	data.Status="READY"
+	data.Ready=true
 	return data
 }
 
@@ -65,6 +66,7 @@ func MCP3208_init(data *Card)(*Card) {
 	data.AddrCount=8
 	data.WordSize=1
 	data.Status="READY"
+	data.Ready=true
 	return data
 }
 
@@ -74,4 +76,8 @@ func MCP3208_read(data *Card)(res []uint8, err error) {
 		res[k] = uint8(rand.Intn(255))
 	}
 	return res, nil
+}
+
+func MCP3208_read_one(data *Card, channel int)(res uint8, err error) {
+	return uint8(rand.Intn(255)), nil
 }

@@ -63,6 +63,7 @@ func ReadCardsFromCSV(filename string) ([]io_class.Card, error) {
 			Status: "Configured",
 			InterruptPin: "",
 			Ready: false,
+			ReadEvery: 1,
 		}
 		if(indices["Interrupt"] < len(record)) {
 			card.InterruptPin = record[indices["Interrupt"]]

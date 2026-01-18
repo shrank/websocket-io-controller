@@ -17,6 +17,7 @@ type Card struct {
 	Status string
 	InterruptPin string
 	Ready bool
+	ReadEvery int
 }
 
 type UpdateHandler func(t string, v map[int]uint8) error
@@ -83,33 +84,51 @@ func (self *IoV1) Update(data map[int]uint8 ) map[int]uint8 {
 
 
 func (self *IoV1) Run() error {
+	count := 0
+	fmt.Printf("Starting main IO loop\n")
 	for true {
+		count += 1
 		for _, card := range self.Inventory {
+			var err error
+			var res []uint8
+			update := make(map[int]uint8)
+
 			if(card.Ready == false) {
 				continue
 			}
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
 			}
+
 			if(card.InterruptPin != "") {
 				i, _ := Interrupt_Fired(card.InterruptPin)
 				if(i == false){
 					continue
 				}
+			} else {
+				if(card.ReadEvery > 1) {
+					// we try to read only one card every run
+					if(count % card.ReadEvery != 10 % int(card.BusAddr)) {
+						continue
+					}
+				}
 			}
-			var res []uint8
-			var err error
-			update := make(map[int]uint8)
+
+			// handle Digial Input Cards
 			if(strings.ToLower(card.Type) == "mcp23017") {
 				res, err = MCP23017_read(&card)
 			}
 
+			// handle Analog Input Cards
 			if(strings.ToLower(card.Type) == "mcp3208") {
 				res, err = MCP3208_read(&card)
 			}
+
 			if(err != nil) {
 				log.Fatal(err)
 			}
+
+			// Send Update
 			i := 0
 			for i < card.AddrCount {
 				if(i>= len(res)) {
@@ -125,7 +144,7 @@ func (self *IoV1) Run() error {
 				self.UpdateHandler("update", update)
 			}
 		}
-		time.Sleep(1 * time.Second)		
+		time.Sleep(10 * time.Millisecond)
 	}	
 	return nil
 }
