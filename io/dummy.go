@@ -23,7 +23,7 @@ func Interrupt_Fired(pin string)( bool, error) {
 	return false, nil
 }
 
-func Ouput_init(pin string)(error) {
+func Output_init(pin string)(error) {
 	fmt.Printf("Setup Output Pin %s\n", pin)
 	return nil
 }
