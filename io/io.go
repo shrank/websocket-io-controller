@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+  "sync"
 )
 
 type Card struct {
@@ -27,11 +28,14 @@ type IoV1 struct {
 	DataBuffer []uint8
 	Inventory []Card
 	BufferSize int
+	updateMap map[int]uint8
+	updateLock sync.Mutex
 }
 
 func (self *IoV1) Init() error {
 	max_addr := 0
 	self.BufferSize = 0
+	self.updateMap = make(map[int]uint8)
 	Raspi_init()
 	for c, card := range self.Inventory {
 		fmt.Printf("Init Card #%d\n", c)
@@ -56,31 +60,14 @@ func (self *IoV1) Init() error {
   return nil
 }
 
-func (self *IoV1) Update(data map[int]uint8 ) map[int]uint8 {
-	res := make(map[int]uint8)
+func (self *IoV1) Update(data map[int]uint8 ) {
+	self.updateLock.Lock()
+  defer self.updateLock.Unlock()
 	for key, value := range data {
-		if(key < len(self.DataBuffer)) {
-			if(self.DataBuffer[key] != value) {
-				self.DataBuffer[key] = value
-				res[key] = value
-			}
-		}	else	{
-			fmt.Printf("address out of range: %d", key)
-		}
+		self.updateMap[key] = value
 	}
-	for _, card := range self.Inventory {
-		if(strings.ToLower(card.Mode) != "out") {
-			continue
-		}
-		for key, _ := range res {
-			if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
-				self.doUpdate(card)
-				break
-			}
-		}
-	}
-	return res
 }
+
 
 
 func (self *IoV1) Run() error {
@@ -89,6 +76,23 @@ func (self *IoV1) Run() error {
 	for true {
 		count += 1
 		update := make(map[int]uint8)
+
+		self.updateLock.Lock()
+		if(len(self.updateMap) > 0) {
+			for key, value := range self.updateMap {
+				if(key < len(self.DataBuffer)) {
+					if(self.DataBuffer[key] != value) {
+						self.DataBuffer[key] = value
+						update[key] = value
+					}
+				}	else	{
+					fmt.Printf("address out of range: %d", key)
+				}
+			}
+			self.updateMap = make(map[int]uint8)
+		}
+		self.updateLock.Unlock()
+
 		for _, card := range self.Inventory {
 			var err error
 			var res []uint8
@@ -96,6 +100,16 @@ func (self *IoV1) Run() error {
 			if(card.Ready == false) {
 				continue
 			}
+
+			if(strings.ToLower(card.Mode) == "out") {
+				for key, _ := range update {
+					if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
+						self.doUpdate(card)
+						break
+					}
+				}
+			}
+
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
 			}

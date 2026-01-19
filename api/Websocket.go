@@ -54,10 +54,7 @@ func (api ApiV1) WsConnect (w http.ResponseWriter, r *http.Request, _ httprouter
 			res := WebsocketUpdate{}
 			json.Unmarshal(message, &res)
 			if(res.MsgType == "update") {
-					r := api.Hardware.Update(res.Data)
-					if(len(r) > 0) {
-						api.SendUpdates(WS_UPDATE, r)
-					}
+					api.Hardware.Update(res.Data)
 			}
 			log.Printf("recv: %s", message)
 		}
