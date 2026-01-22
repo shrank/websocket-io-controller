@@ -86,7 +86,9 @@ func main() {
 	config := flag.String("config", "/etc/io2websocket-gateway.conf", "config file")
 	flag.Parse()
   router := httprouter.New()
+	
 	io_ctr := io_class.IoV1{}
+
 	fmt.Printf("read config %s\n", *config)
   var csv_error error
 	io_ctr.Inventory, csv_error = ReadCardsFromCSV(*config)
@@ -94,7 +96,11 @@ func main() {
 		fmt.Printf("error reading config file %s: %s\n", *config, csv_error)
 		return
 	}
+	
 	io_ctr.Init()
+	io_ctr.ActivityPin = 40
+	io_ctr.IActivityPin = 38
+
 	api := api_class.NewAPI(&io_ctr)
 	
 
