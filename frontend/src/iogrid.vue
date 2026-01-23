@@ -8,18 +8,21 @@
           <th>Value</th>
           <th>Action</th>
           <th>Card</th>
+          <th>Channel</th>
         </tr>
       </thead>
      <tbody>
         <tr v-for="item in allAddr" :key="item.addr">
           <td>{{ item.addr }}</td>
           <td>{{ item.mode }}</td>
-          <td>{{ item.value }}</td>
+          <td v-if="item.value > 0" style="background-color: lightgreen !important;">{{ item.value }}</td>
+          <td v-else >{{ item.value }}</td>
           <td>
             <button v-if="['IN', 'OUT'].includes(item.mode)" @click="toggle(item)">Toggle</button>
             <button @click="monitor(item)">Monitor</button>
             </td>
           <td v-if="item.span > 0 " :class="item.status" :rowspan="item.span"><div class="text-topdown">Card #{{ item.slot }}</div></td>
+          <td class="grid">{{ item.channel }}</td>
         </tr>
       </tbody>
     </table>
@@ -78,7 +81,8 @@ export default {
             slot: card.BusAddr,
             span: card.AddrCount,
             mode: card.Mode,
-            status: card.Status
+            status: card.Status,
+            channel: i - card.StartAddr
           })
           i++
           while( i < card.StartAddr + card.AddrCount) { 
@@ -89,6 +93,7 @@ export default {
               span: 0,
               mode: card.Mode,
               status: card.Status,
+              channel: i - card.StartAddr
             })
             i++
           }
@@ -125,5 +130,10 @@ export default {
 }
 .text-topdown {
   writing-mode: vertical-rl
+}
+.grid {
+  border-color: #006400;
+  border-style: solid;
+  border-width: 1px;
 }
 </style>
