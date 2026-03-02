@@ -30,7 +30,8 @@ func Interrupt_init(pin string)(error) {
 }
 
 func Interrupt_Fired(pin string)( bool, error) {
-	read, err := board.DigitalRead(pin)
+	inPin, err := board.DigitalPin(pin)
+	read, err := inPin.Read()
 	return (read==1), err
 }
 

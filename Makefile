@@ -45,4 +45,4 @@ clean:
 	rm -rf build
 
 ${NAME}:
-	GOARCH=arm64 go build
+	go build

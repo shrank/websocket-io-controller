@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
   "sync"
+	"strconv"
 )
 
 type Card struct {
@@ -19,6 +20,7 @@ type Card struct {
 	InterruptPin string
 	Ready bool
 	ReadEvery int
+	ErrorCnt int
 }
 
 type UpdateHandler func(t string, v map[int]uint8) error
@@ -28,6 +30,9 @@ type IoV1 struct {
 	DataBuffer []uint8
 	Inventory []Card
 	BufferSize int
+	ActivityPin int
+	IActivityPin int
+	ActivityDiv int
 	updateMap map[int]uint8
 	updateLock sync.Mutex
 }
@@ -35,6 +40,9 @@ type IoV1 struct {
 func (self *IoV1) Init() error {
 	max_addr := 0
 	self.BufferSize = 0
+	self.ActivityDiv = 50
+	self.ActivityPin = -1
+	self.IActivityPin = -1
 	self.updateMap = make(map[int]uint8)
 	Raspi_init()
 	for c, card := range self.Inventory {
@@ -72,10 +80,25 @@ func (self *IoV1) Update(data map[int]uint8 ) {
 
 func (self *IoV1) Run() error {
 	count := 0
+	act := 1 
+	if(self.ActivityPin > 0) {
+		Output_init(strconv.Itoa(self.ActivityPin))
+	}
+	if(self.IActivityPin > 0) {
+		Output_init(strconv.Itoa(self.IActivityPin))
+	}
 	fmt.Printf("Starting main IO loop\n")
 	for true {
 		count += 1
 		update := make(map[int]uint8)
+
+		if(self.IActivityPin > 0) {
+			Output_set(strconv.Itoa(self.IActivityPin), 0)
+		}
+		if(self.ActivityPin > 0 && count % self.ActivityDiv == 0 ) {
+			act = (act + 1) % 2
+			Output_set(strconv.Itoa(self.ActivityPin), byte(act))
+		}
 
 		self.updateLock.Lock()
 		if(len(self.updateMap) > 0) {
@@ -101,32 +124,41 @@ func (self *IoV1) Run() error {
 				continue
 			}
 
-			if(strings.ToLower(card.Mode) == "out") {
-				for key, _ := range update {
-					if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
-						self.doUpdate(card)
-						break
+			for key, _ := range update {
+				if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
+					if(strings.ToLower(card.Mode) == "out") {
+						fmt.Printf("write card %d\n", card.BusAddr)
+						self.doUpdate(card)						
 					}
+					break
 				}
 			}
+
 
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
 			}
 
-			if(card.InterruptPin != "") {
-				i, _ := Interrupt_Fired(card.InterruptPin)
-				if(i == false){
-					continue
-				}
-			} else {
-				if(card.ReadEvery > 1) {
-					// we try to read only one card every run
-					if(count % card.ReadEvery != int(card.BusAddr) % 10) {
+
+			if(card.ReadEvery > 1) {
+				// we try to read only one card every run
+				if(count % card.ReadEvery != int(card.BusAddr) % card.ReadEvery) {
+					if(card.InterruptPin != "") {
+						i, _ := Interrupt_Fired(card.InterruptPin)
+						if(i == false){
+							continue
+						}
+						if(self.IActivityPin > 0) {
+							Output_set(strconv.Itoa(self.IActivityPin), 1)
+						}
+						fmt.Printf("interrupt card %d\n", card.BusAddr)					
+					} else {
 						continue
 					}
 				}
 			}
+
+			fmt.Printf("read card %d\n", card.BusAddr)
 
 			// handle Digial Input Cards
 			if(strings.ToLower(card.Type) == "mcp23017") {
@@ -139,7 +171,8 @@ func (self *IoV1) Run() error {
 			}
 
 			if(err != nil) {
-				log.Fatal(err)
+				card.ErrorCnt += 1
+				log.Print(err)
 			}
 
 			// Send Update
@@ -164,11 +197,16 @@ func (self *IoV1) Run() error {
 }
 
 func (self *IoV1) doUpdate(card Card){
+		var err error
 		if(card.Ready == false) {
 			return
 		}
 
 		if(strings.ToLower(card.Type) == "mcp23017") {
-			MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
+			err = MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
+		}
+		if(err != nil) {
+			card.ErrorCnt += 1
+			log.Print(err)
 		}
 }

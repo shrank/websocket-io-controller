@@ -14,6 +14,7 @@ func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1
 	data.Ready = false
+	data.ReadEvery=1000
 	i2c_lock.Lock()
 	defer i2c_lock.Unlock()
 	
@@ -25,19 +26,24 @@ func MCP23017_init(data *Card)(*Card) {
 		return data
 	} 
 
-	err = d.WriteByteData(0x0a, 32 + 16)	// IOCON: MIRROR + SEQOP 
+	err = d.WriteByteData(0x0a, 2 + 64 )	// IOCON: MIRROR 
 
 	if(err != nil) {
 		data.Status=err.Error()
 		fmt.Printf("ERROR: %s\n", err.Error())
 		return data
 	}
-	d.WriteWordData(0x2,0xffff)	// Invert Polarity
-
-	d.WriteWordData(0x4,0xffff)	// Enable Interrupts
 
 	if(strings.ToLower(data.Mode) == "out") {
+		d.WriteWordData(0x12, 0xffff)  //set all pins to high=off
+		d.WriteWordData(0x14, 0xffff)  //set all pins to high=off
 		d.WriteWordData(0x0,0x0)	//set direction output
+		d.WriteWordData(0x12, 0xffff)  //set all pins to high=off
+	} else {
+		d.WriteWordData(0x2,0xffff)	// Invert Polarity
+		d.WriteWordData(0x4,0xffff)	// Enable Interrupts
+		d.WriteWordData(0x8,0x0000)	// Enable Interrupts on Change
+		d.WriteWordData(0x0,0xffff)	//set direction input
 	}
 
 	mcp12017_drivers[data.BusAddr] = d
@@ -48,9 +54,9 @@ func MCP23017_init(data *Card)(*Card) {
 
 func MCP23017_update(card *Card, d []uint8)(error) {
 	value := uint16(0)
-	for _, v := range d {
+	for i := (len(d) -1); i >= 0; i-=1 {
 		value *= 2
-		if(v > 0 ) {
+		if(d[i] == 0 ) {
 			value += 1
 		}
 	}
@@ -62,7 +68,6 @@ func MCP23017_update(card *Card, d []uint8)(error) {
 
 func MCP23017_read(card *Card)(res []uint8, err error) {
 	res = make([]uint8, 16)
-
 	i2c_lock.Lock()
 	defer i2c_lock.Unlock()
 
