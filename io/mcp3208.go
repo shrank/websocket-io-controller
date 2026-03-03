@@ -13,7 +13,7 @@ func MCP3208_init(data *Card)(*Card) {
 	data.AddrCount=8
 	data.WordSize=1
 	data.ReadEvery=10
-	mcp3208_drivers[data.BusAddr] = spi.NewMCP3208Driver(board, spi.WithChipNumber(int(data.BusAddr)-20))
+	mcp3208_drivers[data.BusAddr] = spi.NewMCP3208Driver(board, spi.WithChipNumber(int(data.BusAddr)-20), spi.WithSpeed(1000000))
 	err := mcp3208_drivers[data.BusAddr].Start()
 	if(err != nil) {
 		data.Status=err.Error()

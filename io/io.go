@@ -20,6 +20,7 @@ type Card struct {
 	InterruptPin string
 	Ready bool
 	ReadEvery int
+	ErrorCnt int
 }
 
 type UpdateHandler func(t string, v map[int]uint8) error
@@ -126,11 +127,13 @@ func (self *IoV1) Run() error {
 			for key, _ := range update {
 				if(key >= card.StartAddr && key < card.StartAddr + card.AddrCount) {
 					if(strings.ToLower(card.Mode) == "out") {
-						self.doUpdate(card)
+//						fmt.Printf("write card %d\n", card.BusAddr)
+						self.doUpdate(card)						
 					}
 					break
 				}
 			}
+
 
 			if(strings.ToLower(card.Mode) != "in" && strings.ToLower(card.Mode) != "ain") {
 				continue
@@ -155,7 +158,7 @@ func (self *IoV1) Run() error {
 				}
 			}
 
-			fmt.Printf("read card %d\n", card.BusAddr)
+//			fmt.Printf("read card %d\n", card.BusAddr)
 
 			// handle Digial Input Cards
 			if(strings.ToLower(card.Type) == "mcp23017") {
@@ -168,7 +171,8 @@ func (self *IoV1) Run() error {
 			}
 
 			if(err != nil) {
-				log.Fatal(err)
+				card.ErrorCnt += 1
+				log.Print(err)
 			}
 
 			// Send Update
@@ -193,11 +197,16 @@ func (self *IoV1) Run() error {
 }
 
 func (self *IoV1) doUpdate(card Card){
+		var err error
 		if(card.Ready == false) {
 			return
 		}
 
 		if(strings.ToLower(card.Type) == "mcp23017") {
-			MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
+			err = MCP23017_update(&card, self.DataBuffer[card.StartAddr:card.StartAddr + card.AddrCount])
+		}
+		if(err != nil) {
+			card.ErrorCnt += 1
+			log.Print(err)
 		}
 }

@@ -10,6 +10,7 @@
           <th>Bus Addr</th>
           <th>Mode</th>
           <th>Status</th>
+          <th>Errors</th>
         </tr>
       </thead>
      <tbody>
@@ -21,6 +22,7 @@
           <td>{{ item.BusAddr }}</td>
           <td>{{ item.Mode }}</td>
           <td>{{ item.Status }}</td>
+          <td>{{ item.ErrorCnt }}</td>
         </tr>
       </tbody>
     </table>

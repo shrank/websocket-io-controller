@@ -41,7 +41,7 @@ func MCP23017_init(data *Card)(*Card) {
 		d.WriteWordData(0x12, 0xffff)  //set all pins to high=off
 	} else {
 		d.WriteWordData(0x2,0xffff)	// Invert Polarity
-		d.WriteWordData(0x4,0x0000)	// Enable Interrupts
+		d.WriteWordData(0x4,0xffff)	// Enable Interrupts
 		d.WriteWordData(0x8,0x0000)	// Enable Interrupts on Change
 		d.WriteWordData(0x0,0xffff)	//set direction input
 	}

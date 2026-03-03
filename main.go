@@ -119,7 +119,7 @@ func main() {
 	go io_ctr.Run()
 
   fmt.Printf("Starting server at port 8000\n")
-  if err := http.ListenAndServe(":8000", router); err != nil {
+  if err := http.ListenAndServe(":8001", router); err != nil {
     log.Fatal(err)
   }
 }
