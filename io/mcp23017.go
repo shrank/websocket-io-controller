@@ -14,7 +14,7 @@ func MCP23017_init(data *Card)(*Card) {
 	data.AddrCount=16
 	data.WordSize=1
 	data.Ready = false
-	data.ReadEvery=100
+	data.ReadEvery=1000
 	i2c_lock.Lock()
 	defer i2c_lock.Unlock()
 	
@@ -26,7 +26,7 @@ func MCP23017_init(data *Card)(*Card) {
 		return data
 	} 
 
-	err = d.WriteByteData(0x0a, 2 )	// IOCON: MIRROR 
+	err = d.WriteByteData(0x0a, 2 + 64 )	// IOCON: MIRROR + INTPOL
 
 	if(err != nil) {
 		data.Status=err.Error()
