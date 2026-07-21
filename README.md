@@ -61,3 +61,34 @@ WebsocketUpdate {
   Data: { "1": 1, "10": 1}      # Dictonary of updated I/O data 
 }
 ```
+
+## Build
+
+The project is built with `build_image.sh`. It builds the frontend, cross-compiles the server for Raspberry Pi, packages everything as a Tiny Core overlay, and optionally embeds it into a Tiny Core image.
+
+```
+./build_image.sh <path-to-tinycore-image>
+```
+
+What the script does:
+1. Build the frontend: `npm install && npm run build`
+2. Cross-compile the Go server for `linux/arm64` (default, configurable)
+3. Create a gzip-compressed cpio overlay containing the binary, `config.txt`, frontend assets, an init script, and a `bootlocal.sh` hook
+4. Embed the overlay into the supplied Tiny Core image by copying it to `/overlays/` and patching `/config.txt`
+
+Environment variables:
+```
+VERSION     package version (default: 0.0.1)
+BUILD       build number (default: current timestamp)
+GOARCH      target Go architecture (default: arm64)
+GOARM       target ARM variant when GOARCH=arm (default: unset)
+TC_OUT      output image name (default: tc-io2websocket-gateway-<version>-<build>.img)
+OVERLAY_OUT output overlay name (default: overlay-io2websocket-gateway-<version>-<build>.gz)
+```
+
+For a 32-bit ARM build use:
+```
+GOARCH=arm GOARM=7 ./build_image.sh <path-to-tinycore-image>
+```
+
+The built overlay and image are written to `./build/`.
