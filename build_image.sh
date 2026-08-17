@@ -8,7 +8,7 @@ PKG=${NAME}-${VERSION}-${BUILD}
 
 TC_IMAGE=$1
 TC_OUT=${TC_OUT:-tc-${NAME}-${VERSION}-${BUILD}.img}
-OVERLAY_OUT=${OVERLAY_OUT:-overlay-${NAME}-${VERSION}-${BUILD}.gz}
+OVERLAY_OUT=${OVERLAY_OUT:-overlay-${NAME}-${VERSION}-${BUILD}.tcz}
 
 GOOS=${GOOS:-linux}
 GOARCH=${GOARCH:-arm64}
@@ -79,17 +79,23 @@ esac
 EOF
 chmod +x "${ROOT_DIR}/usr/local/etc/init.d/${NAME}"
 
-log "generating bootlocal.sh hook"
-mkdir -p "${ROOT_DIR}/opt"
-cat > "${ROOT_DIR}/opt/bootlocal.sh" <<EOF
-#!/bin/sh
-/usr/local/etc/init.d/${NAME} start
-EOF
-chmod +x "${ROOT_DIR}/opt/bootlocal.sh"
+# log "generating bootlocal.sh hook"
+# mkdir -p "${ROOT_DIR}/opt"
+# cat > "${ROOT_DIR}/opt/bootlocal.sh" <<EOF
+# #!/bin/sh
+# /usr/local/etc/init.d/${NAME} start
+# EOF
+# chmod +x "${ROOT_DIR}/opt/bootlocal.sh"
 
-log "packaging overlay as gzip compressed cpio"
-cd "${ROOT_DIR}"
-find . -print | cpio -o -H newc | gzip -9 > "${CWD}/build/${OVERLAY_OUT}"
+log "packaging overlay as .tcz"
+mksquashfs ${ROOT_DIR} build/${OVERLAY_OUT} 
+
+find "${ROOT_DIR}" -not -type d > build/${OVERLAY_OUT}.list
+sed -i 's/^\.//' build/${OVERLAY_OUT}.list # drop opening '.'
+
+# make md5sum ...
+cd build/
+md5sum ${OVERLAY_OUT} > ${OVERLAY_OUT}.md5.txt
 cd "${CWD}"
 
 log "overlay created: build/${OVERLAY_OUT}"
@@ -101,21 +107,24 @@ if [ -n "${TC_IMAGE}" ] && [ -f "${TC_IMAGE}" ]; then
     LOOP_DEV=$(sudo losetup -fP --show "${CWD}/build/${TC_OUT}")
     MOUNT_POINT=$(mktemp -d)
 
-    sudo mount "${LOOP_DEV}p1" "${MOUNT_POINT}" || sudo mount "${LOOP_DEV}" "${MOUNT_POINT}"
-    if [ ! -d "${MOUNT_POINT}/overlays" ]; then
+    sudo mount "${LOOP_DEV}p2" "${MOUNT_POINT}" || sudo mount "${LOOP_DEV}" "${MOUNT_POINT}"
+
+    if [ ! -d "${MOUNT_POINT}/tce/optional/" ]; then
         sudo umount "${MOUNT_POINT}"
         sudo losetup -d "${LOOP_DEV}"
         rmdir "${MOUNT_POINT}"
-        log "error: ${MOUNT_POINT}/overlays not found, is this a Tiny Core image?"
+        log "error: ${MOUNT_POINT}/tce/optional/ not found, is this a Tiny Core image?"
         exit 1
     fi
 
-    sudo cp "${CWD}/build/${OVERLAY_OUT}" "${MOUNT_POINT}/${OVERLAY_OUT}"
+    sudo cp "${CWD}/build/${OVERLAY_OUT}" "${MOUNT_POINT}/tce/optional/"
+    sudo cp "${CWD}/build/${OVERLAY_OUT}.list" "${MOUNT_POINT}/tce/optional/"
+    sudo cp "${CWD}/build/${OVERLAY_OUT}.md5.txt" "${MOUNT_POINT}/tce/optional/"
 
-    sudo sed -i -e "s/\.gz /.gz,${OVERLAY_OUT} /g" "${MOUNT_POINT}/config.txt"
-    sudo sh -c "echo dtparam=i2c_arm=on >> ${MOUNT_POINT}/config.txt"
-    sudo sh -c "echo dtparam=spi=on >> ${MOUNT_POINT}/config.txt"
-
+#     sudo sed -i -e "s/\.gz /.gz,${OVERLAY_OUT} /g" "${MOUNT_POINT}/config.txt"
+#     sudo sh -c "echo dtparam=i2c_arm=on >> ${MOUNT_POINT}/config.txt"
+#     sudo sh -c "echo dtparam=spi=on >> ${MOUNT_POINT}/config.txt"
+    sudo sh -c "echo ${OVERLAY_OUT} >> ${MOUNT_POINT}/tce/onboot.lst"
     sudo umount "${MOUNT_POINT}"
     sudo losetup -d "${LOOP_DEV}"
     rmdir "${MOUNT_POINT}"
