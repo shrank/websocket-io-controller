@@ -4,3 +4,4 @@ io2websocket-gateway
 *.img
 *.zip
 *.gz
+test/*
