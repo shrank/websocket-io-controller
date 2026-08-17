@@ -112,7 +112,7 @@ if [ -n "${TC_IMAGE}" ] && [ -f "${TC_IMAGE}" ]; then
 
     sudo cp "${CWD}/build/${OVERLAY_OUT}" "${MOUNT_POINT}/${OVERLAY_OUT}"
 
-    sudo sed -i -e 's/\.gz /.gz,${OVERLAY_OUT} /g' ${MOUNT_POINT}/config.txt
+    sudo sed -i -e "s/\.gz /.gz,${OVERLAY_OUT} /g" "${MOUNT_POINT}/config.txt"
     sudo sh -c "echo dtparam=i2c_arm=on >> ${MOUNT_POINT}/config.txt"
     sudo sh -c "echo dtparam=spi=on >> ${MOUNT_POINT}/config.txt"
 
